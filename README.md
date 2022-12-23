@@ -5,7 +5,6 @@ minutelyBasicNetStatsRecorderは、Gethとの通信には[web3js](https://github
 minutelyBasicNetStatsRecorderは、[blockDataRecorder](https://github.com/ethereumNetStats/blockDataRecorder)から`newBlockDataRecorded`イベントを[socketServer](https://github.com/ethereumNetStats/socketServer)を介して受け取ったときに集計処理を開始し、集計結果をデータベースに記録し、記録が完了したことを`minutelyBasicNetStatsRecorded`イベントでsocketServerに通知します。
 
 # 事前準備
-以下では、ubuntu server v22.04での使用例を説明します。  
 [blockDataRecorder](https://github.com/ethereumNetStats/blockDataRecorder)のDockerのインストール〜ソースコードの実行までを完了して
 Gethの運用とMySQLのDBテーブル`blockData`の生成までを完了して下さい。  
 また、ethereumNetStatsのバックエンドは[socketServer](https://github.com/ethereumNetStats/socketServer)を介してそれぞれのプログラムがデータをやりとりします。したがってsocketServerを稼働させて下さい。
@@ -17,6 +16,7 @@ Gethの運用とMySQLのDBテーブル`blockData`の生成までを完了して�
 - 外部関数：[recordBasicNetStats.ts](https://github.com/ethereumNetStats/minutelyBasicNetStatsRecorder/blob/main/externalFunctions/recordBasicNetStats.ts)
 
 ## 使い方
+以下では、ubuntu server v22.04での使用例を説明します。  
 まずこのレポジトリを`clone`します。
 ```shell
 git clone https://github.com/ethereumNetStats/minutelyBasicNetStats.git
