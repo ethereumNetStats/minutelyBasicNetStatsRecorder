@@ -17,7 +17,47 @@ Gethの運用とMySQLのDBテーブル`blockData`の生成までを完了して�
 
 ## 使い方
 以下では、ubuntu server v22.04での使用例を説明します。  
-まずこのレポジトリを`clone`します。
+まず、[blockDataRecorder](https://github.com/ethereumNetStats/blockDataRecorder)の説明で作成したデータベースに、以下のコマンドで集計データを記録するテーブルを作成します。  
+```mysql
+CREATE TABLE `minutelyBasicNetStats` (
+                                         `startTimeReadable` varchar(19) NOT NULL,
+                                         `endTimeReadable` varchar(19) NOT NULL,
+                                         `startTimeUnix` int NOT NULL,
+                                         `endTimeUnix` int NOT NULL,
+                                         `actualStartTimeUnix` int NOT NULL,
+                                         `actualEndTimeUnix` int NOT NULL,
+                                         `startBlockNumber` int NOT NULL,
+                                         `endBlockNumber` int NOT NULL,
+                                         `blocks` int DEFAULT NULL,
+                                         `totalBlockSize` int DEFAULT NULL,
+                                         `averageBlockSize` float DEFAULT NULL,
+                                         `blockSizePerBlock` float DEFAULT NULL,
+                                         `totalDifficulty` varchar(64) DEFAULT NULL,
+                                         `averageDifficulty` varchar(64) DEFAULT NULL,
+                                         `difficultyPerBlock` varchar(64) DEFAULT NULL,
+                                         `totalUncleDifficulty` varchar(64) DEFAULT NULL,
+                                         `averageUncleDifficulty` varchar(64) DEFAULT NULL,
+                                         `uncleDifficultyPerBlock` varchar(64) DEFAULT NULL,
+                                         `totalNumberOfUncleBlocks` int DEFAULT NULL,
+                                         `averageNumberOfUncleBlocks` float DEFAULT NULL,
+                                         `numberOfUncleBlocksPerBlock` float DEFAULT NULL,
+                                         `hashRate` float DEFAULT NULL,
+                                         `totalTransactions` int DEFAULT NULL,
+                                         `averageTransactions` float DEFAULT NULL,
+                                         `transactionsPerBlock` float DEFAULT NULL,
+                                         `totalBaseFeePerGas` float DEFAULT NULL,
+                                         `averageBaseFeePerGas` float DEFAULT NULL,
+                                         `baseFeePerGasPerBlock` float DEFAULT NULL,
+                                         `totalGasUsed` float DEFAULT NULL,
+                                         `averageGasUsed` float DEFAULT NULL,
+                                         `gasUsedPerBlock` float DEFAULT NULL,
+                                         `noRecordFlag` tinyint(1) DEFAULT NULL,
+                                         KEY `minutelyBasicNetStats_endTimeUnix_index` (`endTimeUnix`),
+                                         KEY `minutelyBasicNetStats_startTimeUnix_index` (`startTimeUnix`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci
+```
+
+次にこのレポジトリを`clone`します。
 ```shell
 git clone https://github.com/ethereumNetStats/minutelyBasicNetStats.git
 ```

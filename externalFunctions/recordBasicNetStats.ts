@@ -15,10 +15,9 @@ import type {Block} from "web3-eth";
 
 // MySQLとのプールコネクションを生成
 let pool: Pool = getMysqlConnection(false);
-const tableName: string = "minutelyBasicNetStats";
 
 // 関数"recordBasicNetStats"の宣言
-export const recordBasicNetStats = async (timeRangeArray: timeRangeArray, socketClient: Socket<ClientToServerEvents>, durationInSec: number) => {
+export const recordBasicNetStats = async (timeRangeArray: timeRangeArray, socketClient: Socket<ClientToServerEvents>, recordTableName: string, durationInSec: number) => {
     console.log(`${currentTimeReadable()} | Start: Recording minutely basic net stats process.`);
 
     // 処理時間の計測開始
@@ -68,7 +67,7 @@ export const recordBasicNetStats = async (timeRangeArray: timeRangeArray, socket
 
         // データベースから集計期間内のブロックデータを取得
         let [blockData] = await pool.query<RowDataPacket[]>(`SELECT *
-                                                             FROM blockData
+                                                             FROM ethereum.blockData
                                                              WHERE timestamp >= ${timeRange.startTime} && timestamp < ${timeRange.endTime}`);
 
         // SQLクエリ用に集計期間を示す値を代入
@@ -76,22 +75,20 @@ export const recordBasicNetStats = async (timeRangeArray: timeRangeArray, socket
         queryData.endTimeReadable = unixTimeReadable(Number(timeRange.endTime));
         queryData.startTimeUnix = Number(timeRange.startTime);
         queryData.endTimeUnix = Number(timeRange.endTime);
-
-        // 集計期間内に生成されたブロックがなければそのことを示すフラグを設定して記録
-        if (blockData.length === 0) {
-            console.log(`${currentTimeReadable()} | No data | Datetime : ${unixTimeReadable(queryData.startTimeUnix)} - ${unixTimeReadable(queryData.endTimeUnix)} | Message : This time range has no blocks. Record zero-data.`);
-            queryData.noRecordFlag = true;
-            await pool.query<OkPacket>(`INSERT INTO ${tableName}
-                                        SET ?`, queryData);
-            continue;
-        }
-
-        // SQLクエリ用の値の代入
         queryData.actualStartTimeUnix = blockData[0].timestamp;
         queryData.actualEndTimeUnix = blockData[blockData.length - 1].timestamp;
         queryData.startBlockNumber = blockData[0].number;
         queryData.endBlockNumber = blockData[blockData.length - 1].number;
         queryData.blocks = blockData.length;
+
+        // 集計期間内に生成されたブロックがなければそのことを示すフラグを設定して記録
+        if (blockData.length === 0) {
+            console.log(`${currentTimeReadable()} | No data | Datetime : ${unixTimeReadable(queryData.startTimeUnix)} - ${unixTimeReadable(queryData.endTimeUnix)} | Message : This time range has no blocks. Record zero-data.`);
+            queryData.noRecordFlag = true;
+            await pool.query<OkPacket>(`INSERT INTO ${recordTableName}
+                                        SET ?`, queryData);
+            continue;
+        }
 
         // 集計用の一時的な変数の宣言
         let tmpTotalDifficulty: number = 0;
@@ -204,7 +201,7 @@ export const recordBasicNetStats = async (timeRangeArray: timeRangeArray, socket
         queryData.uncleDifficultyPerBlock = String(tmpUncleDifficultyPerBlock);
 
         // データベースに集計データを記録
-        await pool.query<OkPacket>(`INSERT INTO ${tableName}
+        await pool.query<OkPacket>(`INSERT INTO ${recordTableName}
                                     SET ?`, queryData);
         console.log(`${currentTimeReadable()} | Insert : A minutely basic net stats. | Datetime : ${unixTimeReadable(queryData.startTimeUnix)} - ${unixTimeReadable(queryData.endTimeUnix)}`);
 

@@ -7,7 +7,7 @@ import {io} from "socket.io-client";
 // 自作パッケージのインポート
 import {getMysqlConnection} from "@ethereum_net_stats/get_mysql_connection";
 import {currentTimeReadable, unixTimeReadable} from "@ethereum_net_stats/readable_time";
-import {timeRangeArrayMaker} from "./externalFunctions/timeRangeArrayMaker";
+import {timeRangeArrayMaker} from "./externalFunctions/timeRangeArrayMaker.js";
 import {recordBasicNetStats} from "./externalFunctions/recordBasicNetStats.js";
 
 // 型定義のインポート
@@ -18,7 +18,7 @@ import type {Pool, RowDataPacket} from "@ethereum_net_stats/get_mysql_connection
 
 // データベースへのプールコネクションを作成
 let pool: Pool = getMysqlConnection(false);
-const tableName: string = "minutelyBasicNetStats";
+const recordTableName: string = "ethereum.minutelyBasicNetStats";
 
 // socket.io-clientの定義
 const socketClientName: string = "minutelyBasicNetStatsRecorder";
@@ -27,7 +27,7 @@ const socketClient: Socket<ServerToClientEvents> = io(`${process.env.SOCKET_SERV
     query: {name: socketClientName}
 });
 
-// ソケットサーバーに接続した時の処理
+// socketServerに接続した時の処理
 socketClient.on('connect', () => {
     console.log(`${currentTimeReadable()} | Connect : socketServer`);
 });
@@ -52,7 +52,7 @@ socketClient.on("newBlockDataRecorded", async (blockNumberWithTimestamp: blockNu
 
         // データベース上の最新データのタイムスタンプを取得
         let [endTimeOfMinutelyBasicNetStats] = await pool.query<RowDataPacket[any]>(`SELECT endTimeUnix
-                                                                                     FROM ${tableName}
+                                                                                     FROM ${recordTableName}
                                                                                      ORDER BY endTimeUnix DESC LIMIT 1`);
 
         // データベースが空の場合には0のタイムスタンプを設定
@@ -66,7 +66,7 @@ socketClient.on("newBlockDataRecorded", async (blockNumberWithTimestamp: blockNu
 
             if (timeRangeArray.length > 0) {
                 // timeRangeArray配列の要素数が１以上で集計期間が定義されていたら集計用の関数を呼び出し
-                await recordBasicNetStats(timeRangeArray, socketClient, DURATION);
+                await recordBasicNetStats(timeRangeArray, socketClient, recordTableName, DURATION);
             } else {
                 // timeRangeArray配列の要素数が０集計期間が定義されていなかったら現在時刻が集計期間を越えるまで待つ
                 console.log(`${currentTimeReadable()} | Wait : The block timestamp to pass the current time range.`);
