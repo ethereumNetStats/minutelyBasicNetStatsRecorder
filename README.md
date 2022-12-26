@@ -1,13 +1,14 @@
 # minutelyBasicNetStatsRecorderについて
-minutelyBasicNetStatsRecorderは、[Geth](https://github.com/ethereum/go-ethereum)にアクセスし、
-イーサリアムネットワークの統計情報をMySQLデータベースに記録します。  
-minutelyBasicNetStatsRecorderは、Gethとの通信には[web3js](https://github.com/web3/web3.js)を使用し、その他の通信には[sokcet.io](https://socket.io/)を使用します。
-minutelyBasicNetStatsRecorderは、[blockDataRecorder](https://github.com/ethereumNetStats/blockDataRecorder)から`newBlockDataRecorded`イベントを[socketServer](https://github.com/ethereumNetStats/socketServer)を介して受け取ったときに集計処理を開始し、集計結果をデータベースに記録し、記録が完了したことを`minutelyBasicNetStatsRecorded`イベントでsocketServerに通知します。
+minutelyBasicNetStatsRecorderは、[blockDataRecorder](https://github.com/ethereumNetStats/blockDataRecorder)からソケットイベントを受信したときに、[Geth](https://github.com/ethereum/go-ethereum)にアクセスし、
+イーサリアムネットワークの集計情報をMySQLデータベースに記録します。  
+より詳細には、minutelyBasicNetStatsRecorderは、[blockDataRecorder](https://github.com/ethereumNetStats/blockDataRecorder)から`newBlockDataRecorded`イベントを[socketServer](https://github.com/ethereumNetStats/socketServer)を介して受け取ったときに[Geth](https://geth.ethereum.org/)にアクセスして集計処理を開始します。  
+集計処理を完了するとminutelyBasicNetStatsRecorderは、集計結果をデータベースに記録し、記録が完了したことを示す`minutelyBasicNetStatsRecorded`イベントを発行して[socketServer](https://github.com/ethereumNetStats/socketServer)に通知します。  
+minutelyBasicNetStatsRecorderは、Gethとの通信には[web3js](https://github.com/web3/web3.js)を使用し、その他のソケット通信には[sokcet.io](https://socket.io/)を使用します。MySQLの使用には、[node-mysql2](https://github.com/sidorares/node-mysql2)を使用します。
 
 # 事前準備
 [blockDataRecorder](https://github.com/ethereumNetStats/blockDataRecorder)のDockerのインストール〜ソースコードの実行までを完了して
 Gethの運用とMySQLのDBテーブル`blockData`の生成までを完了して下さい。  
-また、ethereumNetStatsのバックエンドは[socketServer](https://github.com/ethereumNetStats/socketServer)を介してそれぞれのプログラムがデータをやりとりします。したがってsocketServerを稼働させて下さい。
+また、ethereumNetStatsのバックエンドは[socketServer](https://github.com/ethereumNetStats/socketServer)を介してそれぞれのプログラムがデータをやりとりします。したがって[socketServer](https://github.com/ethereumNetStats/socketServer)を稼働させて下さい。
 プログラムの内容のみを知りたい場合はソースコードを参照ください。  
 
 **ソースコード**
@@ -17,9 +18,9 @@ Gethの運用とMySQLのDBテーブル`blockData`の生成までを完了して�
 
 ## 使い方
 以下では、ubuntu server v22.04での使用例を説明します。  
-まず、[blockDataRecorder](https://github.com/ethereumNetStats/blockDataRecorder)の説明で作成したデータベースに、以下のコマンドで集計データを記録するテーブルを作成します。  
+まず、[blockDataRecorder](https://github.com/ethereumNetStats/blockDataRecorder)の説明で作成したデータベースに、以下のクエリを発行して集計データを記録するテーブルを作成します。  
 ```mysql
-CREATE TABLE `minutelyBasicNetStats` (
+CREATE TABLE `ethereum.minutelyBasicNetStats` (
                                          `startTimeReadable` varchar(19) NOT NULL,
                                          `endTimeReadable` varchar(19) NOT NULL,
                                          `startTimeUnix` int NOT NULL,
@@ -59,9 +60,13 @@ CREATE TABLE `minutelyBasicNetStats` (
 
 次にこのレポジトリを`clone`します。
 ```shell
-git clone https://github.com/ethereumNetStats/minutelyBasicNetStats.git
+git clone https://github.com/ethereumNetStats/minutelyBasicNetStatsRecorder.git
 ```
-クローンしたディレクトリ内にある`.envSample`ファイルの`MYSQL_USER`と`MYSQL_PASS`を編集します。  
+`clone`が終わったら以下のコマンドでクローンしたディレクトリに移動して下さい。
+```shell
+cd ./minutelyBasicNetStatsRecorder
+```
+ディレクトリ内にある`.envSample`ファイルの`MYSQL_USER`と`MYSQL_PASS`を編集します。  
 [blockDataRecorder](https://github.com/ethereumNetStats/blockDataRecorder)の手順通りにMySQLコンテナを立ち上げた場合は`MYSQL_USER=root`、`MYSQL_PASS`は起動時に指定したパスワードになります。  
 `.envSample`
 ```

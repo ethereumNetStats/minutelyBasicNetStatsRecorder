@@ -22,7 +22,7 @@ export const timeRangeArrayMaker = (endTimeOfCalculatedData: number, endTimeOfBa
 
         const GENESIS_TIME: number = 1438269988;
 
-        //Define the end time and start time of the genesis time.
+        // ジェネシスブロックの生成時間を含む最初の集計期間の開始時間と終了時間を定義
         const GENESIS_START_RANGE: number = GENESIS_TIME - (GENESIS_TIME % durationInSec);
         const GENESIS_END_RANGE: number = GENESIS_START_RANGE + durationInSec;
         console.log(`${currentTimeReadable()} | The minutely address count table is empty. The counting from the genesis block.`);
