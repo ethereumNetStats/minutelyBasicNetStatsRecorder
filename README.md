@@ -3,7 +3,7 @@ minutelyBasicNetStatsRecorderは、[blockDataRecorder](https://github.com/ethere
 イーサリアムネットワークの集計情報をMySQLデータベースに記録します。  
 より詳細には、minutelyBasicNetStatsRecorderは、[blockDataRecorder](https://github.com/ethereumNetStats/blockDataRecorder)から`newBlockDataRecorded`イベントを[socketServer](https://github.com/ethereumNetStats/socketServer)を介して受け取ったときに[Geth](https://geth.ethereum.org/)にアクセスして集計処理を開始します。  
 集計処理を完了するとminutelyBasicNetStatsRecorderは、集計結果をデータベースに記録し、記録が完了したことを示す`minutelyBasicNetStatsRecorded`イベントを発行して[socketServer](https://github.com/ethereumNetStats/socketServer)に通知します。  
-minutelyBasicNetStatsRecorderは、Gethとの通信には[web3js](https://github.com/web3/web3.js)を使用し、その他のソケット通信には[sokcet.io](https://socket.io/)を使用します。MySQLの使用には、[node-mysql2](https://github.com/sidorares/node-mysql2)を使用します。
+minutelyBasicNetStatsRecorderは、Gethとの通信には[web3js](https://github.com/web3/web3.js)を使用し、その他のソケット通信には[sokcet.io](https://socket.io/)を使用します。MySQLには、[node-mysql2](https://github.com/sidorares/node-mysql2)を使用してアクセスします。
 
 # 事前準備
 [blockDataRecorder](https://github.com/ethereumNetStats/blockDataRecorder)のDockerのインストール〜ソースコードの実行までを完了して
